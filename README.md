@@ -18,12 +18,13 @@ $result = explorer(
         [2, 'Jane Doe', 'jane.doe@example.com'],
         [3, 'Jan Kowalski', 'kowalski@example.com'],
     ],
-);
+)
+    ->prompt();
 ```
 
 ### Advanced file explorer example usage:
 ```php
-use Knobik\Prompts\ExplorerPrompt;
+use function Knobik\Prompts\explorer;
 
 function getDirectoryFiles(string $path): array
 {
@@ -51,7 +52,7 @@ function getDirectoryFiles(string $path): array
 
 $path = '/var/www/html';
 while (true) {
-    $path = (new ExplorerPrompt(
+    $path = explorer(
         title: $path, //fn(ExplorerPrompt $prompt) => $prompt->highlighted,
         header: [
             'File name',
@@ -59,7 +60,7 @@ while (true) {
             'Permissions'
         ],
         items: $this->getDirectoryFiles($path),
-    ))
+    )
         ->setColumnOptions(
             column: 2,
             width: 20, // number of characters, null or omit to keep it in auto mode

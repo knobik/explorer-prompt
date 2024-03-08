@@ -22,12 +22,9 @@ class ExplorerPrompt extends Prompt
         callable|string|null $title,
         public ?array $header = null,
         public array $items = [],
-        public ?int $scroll = null,
+        public int $scroll = 20,
     ) {
         $this->title = $title ?? '';
-        if ($this->scroll === null) {
-            $this->fullscreen();
-        }
 
         static::$themes['default'][static::class] = ExplorerPromptRenderer::class;
 

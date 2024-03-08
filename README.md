@@ -7,26 +7,23 @@
 use function Knobik\Prompts\explorer;
 
 $result = explorer(
-        title: 'Hello from a explorer window'
-        header: [
-            'ID',
-            'Name',
-            'Email',
-        ],
-        items: [
-            [1, 'John Doe', 'john.doe@example.com'],
-            [2, 'Jane Doe', 'jane.doe@example.com'],
-            [3, 'Jan Kowalski', 'kowalski@example.com'],
-        ],
-    )
-        ->fullscreen()
-        
-        ->prompt();
+    title: 'Hello from a explorer window'
+    header: [
+        'ID',
+        'Name',
+        'Email',
+    ],
+    items: [
+        [1, 'John Doe', 'john.doe@example.com'],
+        [2, 'Jane Doe', 'jane.doe@example.com'],
+        [3, 'Jan Kowalski', 'kowalski@example.com'],
+    ],
+);
 ```
 
 ### Advanced file explorer example usage:
 ```php
-use function Knobik\Prompts\explorer;
+use Knobik\Prompts\ExplorerPrompt;
 
 function getDirectoryFiles(string $path): array
 {
@@ -54,7 +51,7 @@ function getDirectoryFiles(string $path): array
 
 $path = '/var/www/html';
 while (true) {
-    $path = explorer(
+    $path = (new ExplorerPrompt(
         title: $path, //fn(ExplorerPrompt $prompt) => $prompt->highlighted,
         header: [
             'File name',
@@ -68,7 +65,6 @@ while (true) {
             width: 20, // number of characters, null or omit to keep it in auto mode
             align: ColumnAlign::RIGHT
         )
-        ->fullscreen()
         ->prompt();
 
     if (is_file($path)) {

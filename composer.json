@@ -1,0 +1,22 @@
+{
+  "name": "knobik/explorer-prompt",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Knobik\\Prompts\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "require": {
+    "php": "^8.1",
+    "ext-mbstring": "*",
+    "illuminate/collections": "^10.0|^11.0",
+    "symfony/console": "^6.2|^7.0",
+    "laravel/prompts": "^0.1"
+  },
+  "prefer-stable": true,
+  "minimum-stability": "dev"
+}

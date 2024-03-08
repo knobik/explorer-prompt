@@ -1,5 +1,5 @@
 <?php
-namespace Knobik\Prompt;
+namespace Knobik\Prompts;
 
 use Knobik\Prompts\Themes\Default\ColumnAlign;
 use Knobik\Prompts\Themes\Default\ExplorerPromptRenderer;

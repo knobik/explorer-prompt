@@ -1,3 +1,7 @@
+# Laravel Explorer Prompt
+
+Laravel explorer style prompt based on larave/prompts package. Build CLI table based explorers easily.
+
 <div style="text-align:center">
     <img src="img/files.png" />
 </div>

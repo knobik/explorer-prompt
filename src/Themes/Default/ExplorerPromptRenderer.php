@@ -7,6 +7,9 @@ use Laravel\Prompts\Themes\Default\Concerns\DrawsBoxes;
 use Laravel\Prompts\Themes\Default\Concerns\DrawsScrollbars;
 use Laravel\Prompts\Themes\Default\Renderer;
 
+/**
+ * @property ExplorerPrompt $prompt
+ */
 class ExplorerPromptRenderer extends Renderer
 {
     use DrawsBoxes;
@@ -14,103 +17,122 @@ class ExplorerPromptRenderer extends Renderer
 
     public function __invoke(ExplorerPrompt $prompt): string
     {
-        if ($prompt->state !== 'submit') {
-            $visibleItems = collect($prompt->visible())
+        if ($this->prompt->state !== 'submit') {
+            $visibleItems = collect($this->prompt->visible())
                 ->values()
-                ->map(function (array $row) use ($prompt) {
-                    return $this->makeColumn($prompt, $row);
+                ->map(function ($row) {
+                    if (!is_array($row)) {
+                        $row = [$row];
+                    }
+                    return $this->makeColumn($row);
                 });
 
-            if ($visibleItems->count() < $prompt->scroll) {
-                $toAdd = $prompt->scroll - $visibleItems->count();
+            if ($visibleItems->count() < $this->prompt->highlighted) {
+                $this->prompt->highlighted = max(0, $visibleItems->count() - 1);
+            }
+
+            if ($visibleItems->count() < $this->prompt->scroll) {
+                $toAdd = $this->prompt->scroll - $visibleItems->count();
                 for ($i = 0; $i < $toAdd; $i++) {
-                    $visibleItems[] = mb_str_pad('', $this->widthToFill($prompt));
+                    $visibleItems[] = mb_str_pad('', $this->widthToFill($this->prompt));
                 }
             }
 
             $body = $this->scrollbar(
                 $visibleItems,
-                $prompt->firstVisible,
-                $prompt->scroll,
-                count($prompt->items),
-                $prompt->terminal()->cols() - 6
+                $this->prompt->firstVisible,
+                $this->prompt->scroll,
+                count($this->prompt->items),
+                $this->prompt->terminal()->cols() - 6
             )
-                ->map(function ($label, $key) use ($prompt) {
-                    $index = $prompt->firstVisible + $key;
-                    return $prompt->highlighted === $index ? $this->inverse($label) : $label;
+                ->map(function ($label, $key) {
+                    if (count($this->prompt->filteredItems()) === 0) {
+                        return $label;
+                    }
+
+                    $index = $this->prompt->firstVisible + $key;
+                    return $this->prompt->highlighted === $index ? $this->inverse($label) : $label;
                 });
 
-            if ($prompt->header) {
+            if ($this->prompt->header) {
                 $body->prepend(
                     $this->makeColumn(
-                        $prompt,
-                        collect($prompt->header)
+                        collect($this->prompt->header)
                             ->map(fn($item) => strtoupper($item))->toArray()
                     )
                 );
             }
 
-            $this->minWidth = $prompt->terminal()->cols();
-            $this->box($this->getTitle($prompt), $body->implode(PHP_EOL));
+            $this->minWidth = $this->prompt->terminal()->cols();
+
+            if ($this->prompt->showFilterBox()) {
+                $this->box(
+                    $this->cyan($this->truncate('filter', $prompt->terminal()->cols() - 6)),
+                    $this->prompt->valueWithCursor($this->minWidth - 6),
+                );
+            }
+            $this->box($this->getTitle($this->prompt), $body->implode(PHP_EOL));
         }
 
         return $this;
     }
 
-    protected function makeColumn(ExplorerPrompt $prompt, array $values): string
+    protected function makeColumn(array $values): string
     {
         return collect($values)
             ->values()
-            ->map(function ($item, $index) use ($prompt) {
-                $width = $this->calculateColumnWidth($prompt, $index);
-                return mb_str_pad($item, $width, ' ', $prompt->getColumnAlignment($index)->toPadding());
+            ->map(function ($item, $index) {
+                $width = $this->calculateColumnWidth($index);
+                return mb_str_pad($item, $width, ' ', $this->prompt->getColumnAlignment($index)->toPadding());
             })
             ->join(' ');
     }
 
-    protected function getTitle(ExplorerPrompt $prompt): string
+    protected function getTitle(): string
     {
-        $title = $prompt->getTitle();
+        $title = $this->prompt->getTitle();
         if (is_callable($title)) {
-            $title = $title($prompt);
+            $title = $title($this->prompt);
         }
 
         return $title;
     }
 
-    protected function widthToFill(ExplorerPrompt $prompt): int
+    protected function widthToFill(): int
     {
-        return $prompt->terminal()->cols() - 11;
+        return $this->prompt->terminal()->cols() - 11;
     }
 
-    protected function calculateColumnWidth(ExplorerPrompt $prompt, int $column): int
+    protected function calculateColumnWidth(int $column): int
     {
-        $customColumnWidth = $prompt->getColumnWidth($column);
+        $customColumnWidth = $this->prompt->getColumnWidth($column);
         if ($customColumnWidth !== null) {
             return $customColumnWidth;
         }
 
-        $columnCount = $this->columnCount($prompt);
+        $columnCount = $this->columnCount($this->prompt);
         $widthTaken = 0;
         $fixedWidthCount = 0;
         for ($i = 0; $i < $columnCount; $i++) {
-            $width = $prompt->getColumnWidth($i);
+            $width = $this->prompt->getColumnWidth($i);
             if ($width) {
                 $widthTaken += $width;
                 $fixedWidthCount++;
             }
         }
 
-        $widthToFill = $this->widthToFill($prompt) - $widthTaken;
+        $widthToFill = $this->widthToFill($this->prompt) - $widthTaken;
         return floor($widthToFill / ($columnCount - $fixedWidthCount));
     }
 
-    protected function columnCount(ExplorerPrompt $prompt): int
+    protected function columnCount(): int
     {
-        if ($prompt->header !== null) {
-            return count($prompt->header);
+        if ($this->prompt->header !== null) {
+            return count($this->prompt->header);
         }
 
-        return count(head($prompt->items));
+        $item = head($this->prompt->items);
+
+        return is_array($item) ? count($item) : 1;
     }
 }

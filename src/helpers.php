@@ -1,7 +1,7 @@
 <?php
 namespace Knobik\Prompts;
 
-function explorer(callable|string|null $title, ?array $header = null, array $items = [], ?int $scroll = null): mixed
+function explorer(array $items, callable|string|null $title = null, ?array $header = null): ExplorerPrompt
 {
     return new ExplorerPrompt(...func_get_args());
 }

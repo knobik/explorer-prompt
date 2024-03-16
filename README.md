@@ -6,6 +6,12 @@ Laravel explorer style prompt based on larave/prompts package. Build CLI table b
     <img src="img/files.png" />
 </div>
 
+### Installation
+
+```shell
+composer require knobik/explorer-prompt
+```
+
 ### Simple Example usage:
 ```php
 use function Knobik\Prompts\explorer;

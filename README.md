@@ -23,7 +23,9 @@ $result = explorer(
 ```
 
 ### Filtering
-You can filter on your data by pressing forward slash `/`
+You can filter on your data by pressing forward slash `/`.
+
+Filtering prompt can be disabled by using `->disableFiltering()` method.
 
 ### Advanced file explorer example:
 ```php
@@ -64,7 +66,6 @@ while (true) {
             'Permissions'
         ],
     )
-        ->setFiltering(true)
         ->setColumnOptions(
             column: 2,
             width: 20, // number of characters, null to keep it in auto mode

@@ -97,14 +97,6 @@ class ExplorerPrompt extends Prompt
         return $this->state === 'filtering';
     }
 
-    public function setFiltering(bool $filtering): self
-    {
-        $this->filtering = $filtering;
-        $this->setVisibleItems($this->userScroll);
-
-        return $this;
-    }
-
     public function setFilter(string $value): static
     {
         $this->typedValue = $value;
@@ -293,13 +285,17 @@ class ExplorerPrompt extends Prompt
 
     protected function keyForwardSlash()
     {
-        $this->setFilteringState();
+        if ($this->filteringEnabled) {
+            $this->setFilteringState();
+        }
+
         $this->setVisibleItems($this->userScroll);
     }
 
     protected function setFilteringState(): self
     {
         $this->state = 'filtering';
+        $this->setVisibleItems($this->userScroll);
 
         return $this;
     }

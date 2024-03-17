@@ -51,17 +51,12 @@ class FilterHandler
 
         return collect($prompt->items)
             ->filter(function ($item) use ($prompt, $filter) {
-                if (!is_array($item)) {
-                    $item = [$item];
-                }
+                $item = is_array($item) ? $item : [$item];
 
-                $index = 0;
-                foreach ($item as $column) {
+                foreach (array_values($item) as $index => $column) {
                     if ($prompt->getColumnFilterable($index) && str_contains($column, $filter)) {
                         return true;
                     }
-
-                    $index++;
                 }
 
                 return false;

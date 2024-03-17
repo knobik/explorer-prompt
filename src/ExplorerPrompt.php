@@ -101,7 +101,7 @@ class ExplorerPrompt extends Prompt
     {
         $this->typedValue = $value;
         $this->cursorPosition = mb_strlen($value);
-        $this->setVisibleItems($this->userScroll);
+        $this->recalculateScroll();
 
         return $this;
     }
@@ -135,6 +135,10 @@ class ExplorerPrompt extends Prompt
     {
         return collect($this->items)
             ->filter(function ($item) {
+                if ($this->typedValue() === '') {
+                    return true;
+                }
+
                 if (!is_array($item)) {
                     $item = [$item];
                 }
@@ -244,6 +248,11 @@ class ExplorerPrompt extends Prompt
         return $this->inFilteringState() || $this->typedValue() !== '';
     }
 
+    public function setSelection(?int $index)
+    {
+        $this->highlight($index);
+    }
+
     protected function keyUp(): void
     {
         $this->highlight(
@@ -289,13 +298,13 @@ class ExplorerPrompt extends Prompt
             $this->setFilteringState();
         }
 
-        $this->setVisibleItems($this->userScroll);
+        $this->recalculateScroll();
     }
 
     protected function setFilteringState(): self
     {
         $this->state = 'filtering';
-        $this->setVisibleItems($this->userScroll);
+        $this->recalculateScroll();
 
         return $this;
     }
@@ -303,8 +312,14 @@ class ExplorerPrompt extends Prompt
     protected function setActiveState(): self
     {
         $this->state = 'active';
+        $this->recalculateScroll();
 
         return $this;
+    }
+
+    protected function recalculateScroll()
+    {
+        $this->setVisibleItems($this->userScroll);
     }
 
     protected function eraseNewLine(): void

@@ -18,6 +18,14 @@ class ExplorerPromptRenderer extends Renderer
     public function __invoke(ExplorerPrompt $prompt): string
     {
         if ($this->prompt->state !== 'submit') {
+
+            dump($this->prompt->state);
+
+            $filteredCount = count($this->prompt->filteredItems());
+            if ($filteredCount < $this->prompt->highlighted) {
+                $this->prompt->setSelection(0);
+            }
+
             $visibleItems = collect($this->prompt->visible())
                 ->values()
                 ->map(function ($row) {
@@ -26,10 +34,6 @@ class ExplorerPromptRenderer extends Renderer
                     }
                     return $this->makeColumn($row);
                 });
-
-            if ($visibleItems->count() < $this->prompt->highlighted) {
-                $this->prompt->highlighted = max(0, $visibleItems->count() - 1);
-            }
 
             if ($visibleItems->count() < $this->prompt->scroll) {
                 $toAdd = $this->prompt->scroll - $visibleItems->count();
@@ -42,7 +46,7 @@ class ExplorerPromptRenderer extends Renderer
                 $visibleItems,
                 $this->prompt->firstVisible,
                 $this->prompt->scroll,
-                count($this->prompt->items),
+                $filteredCount,
                 $this->prompt->terminal()->cols() - 6
             )
                 ->map(function ($label, $key) {

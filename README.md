@@ -56,8 +56,8 @@ class FilterHandler
                 }
 
                 $index = 0;
-                foreach ($item as $row) {
-                    if ($prompt->getColumnFilterable($index) && str_contains($row, $filter)) {
+                foreach ($item as $column) {
+                    if ($prompt->getColumnFilterable($index) && str_contains($column, $filter)) {
                         return true;
                     }
 

@@ -18,7 +18,7 @@ trait TypedValue
 
     protected function handleFilterKey(string $key)
     {
-        if ($key[0] === "\e" || in_array($key, [Key::CTRL_B, Key::CTRL_F, Key::CTRL_A, Key::CTRL_E])) {
+        if (in_array($key, [Key::CTRL_B, Key::CTRL_F, Key::CTRL_A, Key::CTRL_E, Key::KEY_ESCAPE])) {
             match ($key) {
                 Key::LEFT, Key::LEFT_ARROW, Key::CTRL_B => $this->cursorPosition = max(
                     0,
@@ -37,6 +37,7 @@ trait TypedValue
                         0,
                         $this->cursorPosition
                     ) . mb_substr($this->typedValue, $this->cursorPosition + 1),
+                Key::KEY_ESCAPE => $this->clearFilter(),
                 default => null,
             };
 
@@ -122,5 +123,12 @@ trait TypedValue
         $trimmed = mb_strimwidth($reversed, $start, $width);
 
         return implode('', array_reverse(mb_str_split($trimmed, 1)));
+    }
+
+    private function clearFilter()
+    {
+        $this->typedValue = '';
+        $this->cursorPosition = 0;
+        $this->setActiveState();
     }
 }

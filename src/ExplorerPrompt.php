@@ -3,6 +3,7 @@
 namespace Knobik\Prompts;
 
 use Knobik\Prompts\Concerns\TypedValue;
+use Knobik\Prompts\Handlers\FilterHandler;
 use Knobik\Prompts\Key;
 use Knobik\Prompts\Themes\Default\ColumnAlign;
 use Knobik\Prompts\Themes\Default\ExplorerPromptRenderer;
@@ -16,9 +17,11 @@ class ExplorerPrompt extends Prompt
 
     public string|bool $required = false;
     public array $columnOptions = [];
+    public int $userScroll = 20;
     protected bool $filteringEnabled = true;
     protected string $filterTitle = 'filter';
-    public int $userScroll = 20;
+    protected $filterHandler;
+
     protected $title;
 
     public function __construct(
@@ -31,6 +34,7 @@ class ExplorerPrompt extends Prompt
         $this->title = $title ?? '';
         $this->fullscreen();
         $this->initializeScrolling(0);
+        $this->setFilterHandler(new FilterHandler());
 
         $this->on('key', function ($key) {
             if ($this->inFilteringState()) {
@@ -49,6 +53,18 @@ class ExplorerPrompt extends Prompt
                 };
             }
         });
+    }
+
+    public function getFilterHandler(): callable
+    {
+        return $this->filterHandler;
+    }
+
+    public function setFilterHandler(callable $filterHandler): self
+    {
+        $this->filterHandler = $filterHandler;
+
+        return $this;
     }
 
     public function enableFiltering(): self
@@ -131,28 +147,9 @@ class ExplorerPrompt extends Prompt
 
     public function filteredItems(): array
     {
-        return collect($this->items)
-            ->filter(function ($item) {
-                if ($this->typedValue() === '') {
-                    return true;
-                }
+        $handler = $this->getFilterHandler();
 
-                if (!is_array($item)) {
-                    $item = [$item];
-                }
-
-                $index = 0;
-                foreach ($item as $row) {
-                    if ($this->getColumnFilterable($index) && str_contains($row, $this->typedValue())) {
-                        return true;
-                    }
-
-                    $index++;
-                }
-
-                return false;
-            })
-            ->toArray();
+        return $handler($this, $this->typedValue());
     }
 
     /**

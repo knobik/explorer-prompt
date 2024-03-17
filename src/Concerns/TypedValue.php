@@ -46,6 +46,8 @@ trait TypedValue
 
         // Keys may be buffered.
         foreach (mb_str_split($key) as $key) {
+            $this->setSelection(0);
+
             if ($key === Key::ENTER) {
                 $this->setActiveState();
             } elseif ($key === Key::BACKSPACE || $key === Key::CTRL_H) {

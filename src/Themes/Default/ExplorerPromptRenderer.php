@@ -18,11 +18,6 @@ class ExplorerPromptRenderer extends Renderer
     public function __invoke(ExplorerPrompt $prompt): string
     {
         if ($this->prompt->state !== 'submit') {
-            $filteredCount = count($this->prompt->filteredItems());
-            if ($filteredCount < $this->prompt->highlighted) {
-                $this->prompt->setSelection(0);
-            }
-
             $visibleItems = collect($this->prompt->visible())
                 ->values()
                 ->map(function ($row) {
@@ -43,7 +38,7 @@ class ExplorerPromptRenderer extends Renderer
                 $visibleItems,
                 $this->prompt->firstVisible,
                 $this->prompt->scroll,
-                $filteredCount,
+                count($this->prompt->filteredItems()),
                 $this->prompt->terminal()->cols() - 6
             )
                 ->map(function ($label, $key) {

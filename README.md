@@ -22,7 +22,7 @@ $result = explorer(
         [2, 'Jane Doe', 'jane.doe@example.com'],
         [3, 'Jan Kowalski', 'kowalski@example.com'],
     ],
-    title: 'Hello from a explorer window'
+    title: 'Hello from a explorer window',
     header: [
         'ID',
         'Name',

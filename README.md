@@ -35,7 +35,41 @@ $result = explorer(
 ### Filtering
 You can filter on your data by pressing forward slash `/`.
 
-Filtering prompt can be disabled by using `->disableFiltering()` method.
+Filtering prompt can be disabled by using `disableFiltering` method.
+
+You can also create your custom filtering solution by providing a invokable class or function to the `setFilterHandler` method. Example class:
+```php
+use Knobik\Prompts\ExplorerPrompt;
+
+class FilterHandler
+{
+    public function __invoke(ExplorerPrompt $prompt, string $filter): array
+    {
+        if ($filter === '') {
+            return $prompt->items;
+        }
+
+        return collect($prompt->items)
+            ->filter(function ($item) use ($prompt, $filter) {
+                if (!is_array($item)) {
+                    $item = [$item];
+                }
+
+                $index = 0;
+                foreach ($item as $row) {
+                    if ($prompt->getColumnFilterable($index) && str_contains($row, $filter)) {
+                        return true;
+                    }
+
+                    $index++;
+                }
+
+                return false;
+            })
+            ->toArray();
+    }
+}
+```
 
 ### Advanced file explorer example:
 ```php

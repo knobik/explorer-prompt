@@ -37,10 +37,8 @@ class ExplorerPrompt extends Prompt
                 $this->handleFilterKey($key);
             } else {
                 match ($key) {
-                    Key::UP, Key::UP_ARROW, Key::LEFT, Key::LEFT_ARROW, Key::SHIFT_TAB, Key::CTRL_P, Key::CTRL_B, 'k', 'h' => $this->keyUp(
-                    ),
-                    Key::DOWN, Key::DOWN_ARROW, Key::RIGHT, Key::RIGHT_ARROW, Key::TAB, Key::CTRL_N, Key::CTRL_F, 'j', 'l' => $this->keyDown(
-                    ),
+                    Key::UP, Key::UP_ARROW, Key::LEFT, Key::LEFT_ARROW, Key::SHIFT_TAB, Key::CTRL_P, Key::CTRL_B, 'k', 'h' => $this->keyUp(),
+                    Key::DOWN, Key::DOWN_ARROW, Key::RIGHT, Key::RIGHT_ARROW, Key::TAB, Key::CTRL_N, Key::CTRL_F, 'j', 'l' => $this->keyDown(),
                     Key::oneOf([Key::HOME, Key::CTRL_A], $key) => $this->keyHome(),
                     Key::oneOf([Key::END, Key::CTRL_E], $key) => $this->keyEnd(),
                     Key::KEY_PAGE_UP => $this->keyPageUp(),

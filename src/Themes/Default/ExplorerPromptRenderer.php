@@ -18,9 +18,6 @@ class ExplorerPromptRenderer extends Renderer
     public function __invoke(ExplorerPrompt $prompt): string
     {
         if ($this->prompt->state !== 'submit') {
-
-            dump($this->prompt->state);
-
             $filteredCount = count($this->prompt->filteredItems());
             if ($filteredCount < $this->prompt->highlighted) {
                 $this->prompt->setSelection(0);

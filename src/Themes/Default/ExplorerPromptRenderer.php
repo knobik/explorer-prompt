@@ -61,13 +61,15 @@ class ExplorerPromptRenderer extends Renderer
 
             $this->minWidth = $this->prompt->terminal()->cols();
 
-            if ($this->prompt->showFilterBox()) {
-                $this->box(
+            $this->when(
+                $this->prompt->showFilterBox(),
+                fn() => $this->box(
                     $this->cyan($this->truncate('filter', $prompt->terminal()->cols() - 6)),
                     $this->prompt->valueWithCursor($this->minWidth - 6),
-                );
-            }
+                )
+            );
             $this->box($this->getTitle($this->prompt), $body->implode(PHP_EOL));
+            $this->when($this->prompt->getHint(), fn() => $this->hint($this->prompt->getHint()));
         }
 
         return $this;

@@ -16,43 +16,56 @@ class ExplorerPrompt extends Prompt
     use TypedValue;
 
     public string|bool $required = false;
+
+    public array $items;
+
+    public array|null $header = null;
+
     public array $columnOptions = [];
+
     public int $userScroll = 20;
+
     protected bool $filteringEnabled = true;
+
     protected string $filterTitle = 'filter';
+
+    protected string $hint = '';
+
     protected $filterHandler;
 
     protected $title;
 
-    public function __construct(
-        public array $items,
-        callable|string|null $title = null,
-        public ?array $header = null
-    ) {
+    public function __construct(array $items, callable|string $title = '', ?array $header = null)
+    {
+        $this->items = $items;
+        $this->header = $header;
+        $this->title = $title;
+
         static::$themes['default'][static::class] = ExplorerPromptRenderer::class;
 
-        $this->title = $title ?? '';
         $this->fullscreen();
         $this->initializeScrolling(0);
         $this->setFilterHandler(new FilterHandler());
 
-        $this->on('key', function ($key) {
-            if ($this->inFilteringState()) {
-                $this->handleFilterKey($key);
-            } else {
-                match ($key) {
-                    Key::UP, Key::UP_ARROW, Key::LEFT, Key::LEFT_ARROW, Key::SHIFT_TAB, Key::CTRL_P, Key::CTRL_B, 'k', 'h' => $this->keyUp(),
-                    Key::DOWN, Key::DOWN_ARROW, Key::RIGHT, Key::RIGHT_ARROW, Key::TAB, Key::CTRL_N, Key::CTRL_F, 'j', 'l' => $this->keyDown(),
-                    Key::oneOf([Key::HOME, Key::CTRL_A], $key) => $this->keyHome(),
-                    Key::oneOf([Key::END, Key::CTRL_E], $key) => $this->keyEnd(),
-                    Key::KEY_PAGE_UP => $this->keyPageUp(),
-                    Key::KEY_PAGE_DOWN => $this->keyPageDown(),
-                    Key::ENTER => $this->keyEnter(),
-                    Key::KEY_FORWARD_SLASH => $this->keyForwardSlash(),
-                    default => null,
-                };
-            }
-        });
+        $this->setupKeyHandling();
+    }
+
+    public function getHint(): string
+    {
+        return $this->hint;
+    }
+
+    public function setHint(string $hint): self
+    {
+        $this->hint = $hint;
+        $this->recalculateScroll();
+
+        return $this;
+    }
+
+    public function getHintHeight(): int
+    {
+        return count(explode("\n", $this->getHint()));
     }
 
     public function getFilterHandler(): callable
@@ -123,7 +136,11 @@ class ExplorerPrompt extends Prompt
     public function setVisibleItems(int $itemsVisible): static
     {
         $this->userScroll = $itemsVisible;
-        $this->scroll = $this->userScroll - ($this->showFilterBox() ? $this->filterHeight() : 0);
+
+        $filterBoxHeightDelta = ($this->showFilterBox() ? $this->filterHeight() : 0);
+        $hintHeightDelta = ($this->hint !== '' ? $this->getHintHeight() : 0);
+
+        $this->scroll = $this->userScroll - $filterBoxHeightDelta - $hintHeightDelta;
 
         return $this;
     }
@@ -302,6 +319,32 @@ class ExplorerPrompt extends Prompt
         $this->recalculateScroll();
 
         return $this;
+    }
+
+    /**
+     * @return void
+     */
+    protected function setupKeyHandling(): void
+    {
+        $this->on('key', function ($key) {
+            if ($this->inFilteringState()) {
+                $this->handleFilterKey($key);
+            } else {
+                match ($key) {
+                    Key::UP, Key::UP_ARROW, Key::LEFT, Key::LEFT_ARROW, Key::SHIFT_TAB, Key::CTRL_P, Key::CTRL_B, 'k', 'h' => $this->keyUp(
+                    ),
+                    Key::DOWN, Key::DOWN_ARROW, Key::RIGHT, Key::RIGHT_ARROW, Key::TAB, Key::CTRL_N, Key::CTRL_F, 'j', 'l' => $this->keyDown(
+                    ),
+                    Key::oneOf([Key::HOME, Key::CTRL_A], $key) => $this->keyHome(),
+                    Key::oneOf([Key::END, Key::CTRL_E], $key) => $this->keyEnd(),
+                    Key::KEY_PAGE_UP => $this->keyPageUp(),
+                    Key::KEY_PAGE_DOWN => $this->keyPageDown(),
+                    Key::ENTER => $this->keyEnter(),
+                    Key::KEY_FORWARD_SLASH => $this->keyForwardSlash(),
+                    default => null,
+                };
+            }
+        });
     }
 
     protected function setActiveState(): self

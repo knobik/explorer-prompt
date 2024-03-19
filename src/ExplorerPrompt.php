@@ -102,9 +102,11 @@ class ExplorerPrompt extends Prompt
         return $this->filterTitle;
     }
 
-    public function setFilterTitle(string $filterTitle): void
+    public function setFilterTitle(string $filterTitle): self
     {
         $this->filterTitle = $filterTitle;
+
+        return $this;
     }
 
     public function getheader(): ?array

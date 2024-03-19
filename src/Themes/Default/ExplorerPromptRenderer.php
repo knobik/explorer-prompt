@@ -81,7 +81,7 @@ class ExplorerPromptRenderer extends Renderer
             ->values()
             ->map(function ($item, $index) {
                 $width = $this->calculateColumnWidth($index);
-                return mb_str_pad($item, $width, ' ', $this->prompt->getColumnAlignment($index)->toPadding());
+                return mb_str_pad($item ?? '', $width, ' ', $this->prompt->getColumnAlignment($index)->toPadding());
             })
             ->join(' ');
     }

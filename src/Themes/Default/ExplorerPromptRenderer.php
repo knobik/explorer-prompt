@@ -64,7 +64,7 @@ class ExplorerPromptRenderer extends Renderer
             $this->when(
                 $this->prompt->showFilterBox(),
                 fn() => $this->box(
-                    $this->cyan($this->truncate('filter', $prompt->terminal()->cols() - 6)),
+                    $this->cyan($this->truncate($this->prompt->getFilterTitle(), $prompt->terminal()->cols() - 6)),
                     $this->prompt->valueWithCursor($this->minWidth - 6),
                 )
             );

@@ -46,6 +46,7 @@ class ExplorerPrompt extends Prompt
         $this->fullscreen();
         $this->initializeScrolling(0);
         $this->setFilterHandler(new FilterHandler());
+        $this->setFilterTitle('Filter');
 
         $this->setupKeyHandling();
     }

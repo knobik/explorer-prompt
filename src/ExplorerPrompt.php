@@ -39,6 +39,8 @@ class ExplorerPrompt extends Prompt
 
     protected $columnWidthCache = [];
 
+    protected $customKeyHandlers = [];
+
     public function __construct(array $items, callable|string $title = '', ?array $header = null)
     {
         $this->items = $items;
@@ -282,6 +284,13 @@ class ExplorerPrompt extends Prompt
         return $this->inFilteringState() || $this->typedValue() !== '';
     }
 
+    public function setCustomKeyHandler(string $key, callable $keyHandler): self
+    {
+        $this->customKeyHandlers[$key] = $keyHandler;
+
+        return $this;
+    }
+
     protected function highlightNext(int $total, bool $allowNull = false): void
     {
         parent::highlightNext($total, $allowNull);
@@ -359,6 +368,11 @@ class ExplorerPrompt extends Prompt
         $this->recalculateScroll();
     }
 
+    public function close(): void
+    {
+        $this->submit();
+    }
+
     protected function setFilteringState(): self
     {
         $this->state = 'filtering';
@@ -387,10 +401,19 @@ class ExplorerPrompt extends Prompt
                     Key::KEY_PAGE_DOWN => $this->keyPageDown(),
                     Key::ENTER => $this->keyEnter(),
                     Key::KEY_FORWARD_SLASH => $this->keyForwardSlash(),
-                    default => null,
+                    default => $this->callCustomKeyHandler($key),
                 };
             }
         });
+    }
+
+    protected function callCustomKeyHandler(string $key): mixed
+    {
+        if (isset($this->customKeyHandlers[$key])) {
+            return $this->customKeyHandlers[$key]($this, $key);
+        }
+
+        return null;
     }
 
     protected function setActiveState(): self

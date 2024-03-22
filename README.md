@@ -105,6 +105,9 @@ while (true) {
             'Permissions'
         ],
     )
+        ->setCustomKeyHandler("d", function(ExplorerPrompt $prompt, string $key) { // custom key handler
+            $prompt->close();
+        })
         ->setColumnOptions(
             column: 2,
             width: 20, // number of characters, null to keep it in auto mode

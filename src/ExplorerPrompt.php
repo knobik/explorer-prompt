@@ -370,10 +370,12 @@ class ExplorerPrompt extends Prompt
         $this->recalculateScroll();
     }
 
-    public function cancel(): void
+    public function cancel(): self
     {
         $this->setSelection(null);
         $this->submit();
+
+        return $this;
     }
 
     protected function setFilteringState(): self

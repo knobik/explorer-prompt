@@ -307,7 +307,7 @@ class ExplorerPrompt extends Prompt
         if (empty($keys)) {
             $this->selectedValue = null;
         } else {
-            $this->selectedValue = array_search($filteredItems[$keys[$this->highlighted]], $filteredItems);
+            $this->selectedValue = array_search($filteredItems[$keys[$this->highlighted]], $filteredItems, true);
         }
     }
 
@@ -350,7 +350,7 @@ class ExplorerPrompt extends Prompt
         $this->submit();
     }
 
-    protected function keyForwardSlash()
+    protected function keyForwardSlash(): void
     {
         if ($this->filteringEnabled) {
             $this->setFilteringState();
@@ -401,7 +401,7 @@ class ExplorerPrompt extends Prompt
         return $this;
     }
 
-    protected function recalculateScroll()
+    protected function recalculateScroll(): void
     {
         $this->setVisibleItems($this->userScroll);
     }

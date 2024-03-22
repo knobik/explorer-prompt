@@ -50,6 +50,8 @@ class ExplorerPromptRenderer extends Renderer
                     return $this->prompt->highlighted === $index ? $this->inverse($label) : $label;
                 });
 
+            $this->minWidth = $this->prompt->terminal()->cols();
+
             if ($this->prompt->header) {
                 $body->prepend(
                     $this->makeColumn(
@@ -58,8 +60,6 @@ class ExplorerPromptRenderer extends Renderer
                     )
                 );
             }
-
-            $this->minWidth = $this->prompt->terminal()->cols();
 
             $this->when(
                 $this->prompt->showFilterBox(),
@@ -77,13 +77,17 @@ class ExplorerPromptRenderer extends Renderer
 
     protected function makeColumn(array $values): string
     {
-        return collect($values)
-            ->values()
-            ->map(function ($item, $index) {
-                $width = $this->calculateColumnWidth($index);
-                return mb_str_pad($item ?? '', $width, ' ', $this->prompt->getColumnAlignment($index)->toPadding());
-            })
-            ->join(' ');
+        return mb_substr(
+            collect($values)
+                ->values()
+                ->map(function ($item, $index) {
+                    $width = $this->calculateColumnWidth($index);
+                    return mb_str_pad($item ?? '', $width, ' ', $this->prompt->getColumnAlignment($index)->toPadding());
+                })
+                ->join(' '),
+            0,
+            $this->widthToFill()
+        );
     }
 
     protected function getTitle(): string
@@ -98,7 +102,7 @@ class ExplorerPromptRenderer extends Renderer
 
     protected function widthToFill(): int
     {
-        return $this->prompt->terminal()->cols() - 11;
+        return $this->prompt->terminal()->cols() - 8;
     }
 
     protected function calculateColumnWidth(int $column): int
@@ -113,7 +117,7 @@ class ExplorerPromptRenderer extends Renderer
         $columnsWithCustomWidth = $this->prompt->countColumnsWithFixedWidth();
         $widthPerColumn = floor($widthToFill / ($this->columnCount($this->prompt) - $columnsWithCustomWidth));
 
-        return $this->prompt->getColumnMinWidth($column) + $widthPerColumn;
+        return $this->prompt->getColumnMinWidth($column) + ($widthPerColumn > 0 ? $widthPerColumn : 0);
     }
 
     protected function columnCount(): int

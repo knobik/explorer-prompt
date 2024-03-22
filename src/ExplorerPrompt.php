@@ -225,7 +225,7 @@ class ExplorerPrompt extends Prompt
 
     public function getColumnFilterable(int $column): bool
     {
-        return $this->columnOptions[$column]['width'] ?? true;
+        return $this->columnOptions[$column]['filterable'] ?? true;
     }
 
     public function getColumnWidthTaken(): int

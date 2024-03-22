@@ -68,6 +68,7 @@ class FilterHandler
 
 ### Advanced file explorer example:
 ```php
+use Knobik\Prompts\Key;
 use function Knobik\Prompts\explorer;
 
 function getDirectoryFiles(string $path): array
@@ -105,8 +106,8 @@ while (true) {
             'Permissions'
         ],
     )
-        ->setCustomKeyHandler("d", function(ExplorerPrompt $prompt, string $key) { // custom key handler
-            $prompt->close();
+        ->setCustomKeyHandler(Key::KEY_ESCAPE, function(ExplorerPrompt $prompt, string $key) { // custom key handler
+            $prompt->cancel();
         })
         ->setColumnOptions(
             column: 2,

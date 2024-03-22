@@ -303,17 +303,19 @@ class ExplorerPrompt extends Prompt
         $this->calculateSelectedValue();
     }
 
-    public function setSelection(?int $index)
+    public function setSelection(?int $index): self
     {
         $this->highlight($index);
         $this->calculateSelectedValue();
+
+        return $this;
     }
 
     protected function calculateSelectedValue(): void
     {
         $filteredItems = $this->filteredItems();
         $keys = array_keys($filteredItems);
-        if (empty($keys)) {
+        if ($this->highlighted === null || empty($keys)) {
             $this->selectedValue = null;
         } else {
             $this->selectedValue = array_search($filteredItems[$keys[$this->highlighted]], $filteredItems, true);
@@ -368,8 +370,9 @@ class ExplorerPrompt extends Prompt
         $this->recalculateScroll();
     }
 
-    public function close(): void
+    public function cancel(): void
     {
+        $this->setSelection(null);
         $this->submit();
     }
 

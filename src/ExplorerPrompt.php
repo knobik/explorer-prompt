@@ -31,9 +31,13 @@ class ExplorerPrompt extends Prompt
 
     protected string $hint = '';
 
+    protected mixed $selectedValue;
+
     protected $filterHandler;
 
     protected $title;
+
+    protected $columnWidthCache = [];
 
     public function __construct(array $items, callable|string $title = '', ?array $header = null)
     {
@@ -44,9 +48,12 @@ class ExplorerPrompt extends Prompt
         static::$themes['default'][static::class] = ExplorerPromptRenderer::class;
 
         $this->fullscreen();
-        $this->initializeScrolling(0);
         $this->setFilterHandler(new FilterHandler());
         $this->setFilterTitle('Filter');
+
+        $this->initializeScrolling(0);
+        $this->calculateSelectedValue();
+        $this->calculateColumnWidths();
 
         $this->setupKeyHandling();
     }
@@ -157,12 +164,7 @@ class ExplorerPrompt extends Prompt
 
     public function value(): mixed
     {
-        $keys = array_keys($this->filteredItems());
-        if (empty($keys)) {
-            return null;
-        }
-
-        return array_search($this->filteredItems()[$keys[$this->highlighted]], $this->filteredItems());
+        return $this->selectedValue;
     }
 
     public function filteredItems(): array
@@ -226,6 +228,23 @@ class ExplorerPrompt extends Prompt
         return $this->columnOptions[$column]['width'] ?? true;
     }
 
+    public function getColumnWidthTaken(): int
+    {
+        return array_sum($this->columnWidthCache);
+    }
+
+    public function getColumnMinWidth(int $index): ?int
+    {
+        return $this->getColumnWidth($index) ?? $this->columnWidthCache[$index] ?? null;
+    }
+
+    public function countColumnsWithFixedWidth(): int
+    {
+        return collect($this->columnOptions)
+            ->filter(fn(array $options) => $options['width'] !== null)
+            ->count();
+    }
+
     /**
      * Get the entered value with a virtual cursor.
      */
@@ -263,43 +282,67 @@ class ExplorerPrompt extends Prompt
         return $this->inFilteringState() || $this->typedValue() !== '';
     }
 
+    protected function highlightNext(int $total, bool $allowNull = false): void
+    {
+        parent::highlightNext($total, $allowNull);
+        $this->calculateSelectedValue();
+    }
+
+    protected function highlightPrevious(int $total, bool $allowNull = false): void
+    {
+        parent::highlightPrevious($total, $allowNull);
+        $this->calculateSelectedValue();
+    }
+
     public function setSelection(?int $index)
     {
         $this->highlight($index);
+        $this->calculateSelectedValue();
+    }
+
+    protected function calculateSelectedValue(): void
+    {
+        $filteredItems = $this->filteredItems();
+        $keys = array_keys($filteredItems);
+        if (empty($keys)) {
+            $this->selectedValue = null;
+        } else {
+            $this->selectedValue = array_search($filteredItems[$keys[$this->highlighted]], $filteredItems);
+        }
     }
 
     protected function keyUp(): void
     {
-        $this->highlight(
+        $this->setSelection(
             max(0, $this->highlighted - 1)
         );
     }
 
     protected function keyDown(): void
     {
-        $this->highlight(
+        $this->setSelection(
             min(count($this->filteredItems()) > 0 ? count($this->filteredItems()) - 1 : 0, $this->highlighted + 1)
         );
     }
 
     protected function keyHome(): void
     {
-        $this->highlight(0);
+        $this->setSelection(0);
     }
 
     protected function keyEnd(): void
     {
-        $this->highlight(count($this->filteredItems()) - 1);
+        $this->setSelection(count($this->filteredItems()) - 1);
     }
 
     protected function keyPageUp(): void
     {
-        $this->highlight(max(0, $this->highlighted - $this->scroll));
+        $this->setSelection(max(0, $this->highlighted - $this->scroll));
     }
 
     protected function keyPageDown(): void
     {
-        $this->highlight(min(count($this->filteredItems()) - 1, $this->highlighted + $this->scroll));
+        $this->setSelection(min(count($this->filteredItems()) - 1, $this->highlighted + $this->scroll));
     }
 
     protected function keyEnter(): void
@@ -361,6 +404,31 @@ class ExplorerPrompt extends Prompt
     protected function recalculateScroll()
     {
         $this->setVisibleItems($this->userScroll);
+    }
+
+    protected function calculateColumnWidths(): void
+    {
+        $items = collect($this->items);
+        $keys = collect($items->first())->keys();
+
+        if ($this->header) {
+            $headerItem = [];
+            $headers = array_values($this->header);
+            foreach ($keys as $index => $key) {
+                $headerItem[$key] = $headers[$index];
+            }
+            $items = $items->union(['__header' => $headerItem]);
+        }
+
+        $items = $items->map(function (array $item) {
+            return collect($item)
+                ->mapWithKeys(fn($value, $key) => [$key => mb_strlen($value)])
+                ->toArray();
+        });
+
+        foreach ($keys as $index => $key) {
+            $this->columnWidthCache[$index] = $items->max($key);
+        }
     }
 
     protected function eraseNewLine(): void

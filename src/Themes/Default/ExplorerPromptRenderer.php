@@ -108,19 +108,12 @@ class ExplorerPromptRenderer extends Renderer
             return $customColumnWidth;
         }
 
-        $columnCount = $this->columnCount($this->prompt);
-        $widthTaken = 0;
-        $fixedWidthCount = 0;
-        for ($i = 0; $i < $columnCount; $i++) {
-            $width = $this->prompt->getColumnWidth($i);
-            if ($width) {
-                $widthTaken += $width;
-                $fixedWidthCount++;
-            }
-        }
-
+        $widthTaken = $this->prompt->getColumnWidthTaken();
         $widthToFill = $this->widthToFill($this->prompt) - $widthTaken;
-        return floor($widthToFill / ($columnCount - $fixedWidthCount));
+        $columnsWithCustomWidth = $this->prompt->countColumnsWithFixedWidth();
+        $widthPerColumn = floor($widthToFill / ($this->columnCount($this->prompt) - $columnsWithCustomWidth));
+
+        return $this->prompt->getColumnMinWidth($column) + $widthPerColumn;
     }
 
     protected function columnCount(): int

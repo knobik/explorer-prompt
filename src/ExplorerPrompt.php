@@ -37,13 +37,16 @@ class ExplorerPrompt extends Prompt
 
     protected $title;
 
-    protected $columnWidthCache = [];
+    protected array $columnWidthCache = [];
 
-    protected $customKeyHandlers = [];
+    protected array $customKeyHandlers = [];
+
+    protected array $filteredItemsCache = [];
 
     public function __construct(array $items, callable|string $title = '', ?array $header = null)
     {
         $this->items = $items;
+        $this->filteredItemsCache = $items;
         $this->header = $header;
         $this->title = $title;
 
@@ -171,9 +174,7 @@ class ExplorerPrompt extends Prompt
 
     public function filteredItems(): array
     {
-        $handler = $this->getFilterHandler();
-
-        return $handler($this, $this->typedValue());
+        return $this->filteredItemsCache;
     }
 
     /**

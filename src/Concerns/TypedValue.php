@@ -67,7 +67,17 @@ trait TypedValue
                     );
                 $this->cursorPosition++;
             }
+
+            $this->updateFilteredItems();
         }
+    }
+
+    protected function updateFilteredItems(): self
+    {
+        $handler = $this->getFilterHandler();
+        $this->filteredItemsCache = $handler($this, $this->typedValue());
+
+        return $this;
     }
 
     /**
@@ -131,6 +141,7 @@ trait TypedValue
     {
         $this->typedValue = '';
         $this->cursorPosition = 0;
+        $this->updateFilteredItems();
         $this->setActiveState();
     }
 }

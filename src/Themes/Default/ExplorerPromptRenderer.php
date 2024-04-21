@@ -17,6 +17,8 @@ class ExplorerPromptRenderer extends Renderer
 
     public function __invoke(ExplorerPrompt $prompt): string
     {
+        $this->minWidth = $this->prompt->terminal()->cols();
+
         if ($this->prompt->state !== 'submit') {
             $visibleItems = collect($this->prompt->visible())
                 ->values()
@@ -49,8 +51,6 @@ class ExplorerPromptRenderer extends Renderer
                     $index = $this->prompt->firstVisible + $key;
                     return $this->prompt->highlighted === $index ? $this->inverse($label) : $label;
                 });
-
-            $this->minWidth = $this->prompt->terminal()->cols();
 
             if ($this->prompt->header) {
                 $body->prepend(

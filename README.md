@@ -1,6 +1,6 @@
 # Laravel Explorer Prompt
 
-Laravel explorer style prompt based on larave/prompts package. Build CLI table based explorers easily.
+Laravel explorer style prompt based on laravel/prompts package. Build CLI table based explorers easily.
 
 <div style="text-align:center">
     <img src="img/files.png" />
@@ -37,7 +37,7 @@ You can filter on your data by pressing forward slash `/`.
 
 Filtering prompt can be disabled by using `disableFiltering` method.
 
-You can also create your custom filtering solution by providing a invokable class or function to the `setFilterHandler` method. Example class:
+You can also create your custom filtering solution by providing an invokable class or function to the `setFilterHandler` method. Example class:
 ```php
 use Knobik\Prompts\ExplorerPrompt;
 

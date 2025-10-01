@@ -15,7 +15,7 @@
     "ext-mbstring": "*",
     "illuminate/collections": "^10.0|^11.0|^12.0",
     "symfony/console": "^6.2|^7.0",
-    "laravel/prompts": "0.3"
+    "laravel/prompts": "^0.3"
   },
   "prefer-stable": true,
   "minimum-stability": "dev"
